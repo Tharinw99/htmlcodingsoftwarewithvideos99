@@ -1,6 +1,6 @@
 {
   "name": "Media Vault & HTML Adder",
-  "description": "Massive YouTube player with high quality features, light/dark mode, and a tool to save & preview custom HTML snippets.",
+  "description": "Massive YouTube player with advanced features, combat channels search, and supreme YouTube mp3+mp4 downloader with offline study workspace.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

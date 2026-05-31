@@ -10,7 +10,7 @@ import { HtmlAdder } from './components/HtmlAdder';
 import { useAppStore } from './store';
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<"youtube" | "html-adder">("youtube");
+  const [currentView, setCurrentView] = useState<"browse" | "channels" | "downloader" | "playlists" | "offline" | "html-adder">("browse");
   const { theme } = useAppStore();
 
   useEffect(() => {
@@ -27,7 +27,14 @@ export default function App() {
       <Sidebar currentView={currentView} setCurrentView={setCurrentView} />
       
       <main className="flex-grow flex flex-col relative overflow-hidden bg-muted/20">
-        {currentView === "youtube" ? <YouTubeViewer /> : <HtmlAdder />}
+        {currentView === "html-adder" ? (
+          <HtmlAdder />
+        ) : (
+          <YouTubeViewer 
+            activeMainTab={currentView === "html-adder" ? "browse" : currentView} 
+            setActiveMainTab={(tab) => setCurrentView(tab)} 
+          />
+        )}
       </main>
     </div>
   );
