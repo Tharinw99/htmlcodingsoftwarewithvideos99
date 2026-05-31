@@ -28,6 +28,9 @@ interface AppState {
 
   simulatedOfflineMode: boolean;
   setSimulatedOfflineMode: (offline: boolean) => void;
+
+  youtubeApiKey: string;
+  setYoutubeApiKey: (key: string) => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -153,6 +156,10 @@ export const useAppStore = create<AppState>()(
       // Offline mode toggling
       simulatedOfflineMode: false,
       setSimulatedOfflineMode: (offline) => set({ simulatedOfflineMode: offline }),
+
+      // API Key
+      youtubeApiKey: '',
+      setYoutubeApiKey: (key) => set({ youtubeApiKey: key }),
     }),
     {
       name: 'media-vault-storage',

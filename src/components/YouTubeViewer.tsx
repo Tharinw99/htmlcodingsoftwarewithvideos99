@@ -25,19 +25,19 @@ import {
   Share2,
   Trash,
   Grid,
-  List
+  List,
+  Key
 } from "lucide-react";
 import { useAppStore } from "../store";
 import { cn } from "../lib/utils";
 import { YouTubeVideo } from "../types";
 
 const CATEGORIES = [
-  { label: "All Cinema 🎬", query: "Cinematic HDR 4K Nature Landscape" },
+  { label: "Boxing 🥊", query: "Boxing highlights full fight knockouts" },
+  { label: "MMA / UFC 🥋", query: "UFC MMA highlights full fights" },
+  { label: "Sports Podcasts 🎙️", query: "Sports boxing podcast interviews" },
   { label: "Lofi Beats 🎧", query: "Lofi hip hop beats relaxing background" },
-  { label: "Tech & Coding 💻", query: "Mechanical keyboard ASMR developer coding coding background" },
-  { label: "Nature ASMR 🌧️", query: "Relaxing nature thunderstorm forest rain relaxation" },
-  { label: "Space & Synth 🌌", query: "Space ambient synth interstellar travel background" },
-  { label: "Cafe Jazz ☕", query: "Cozy fireplace smooth lounge jazz background" }
+  { label: "Tech & Coding 💻", query: "Mechanical keyboard ASMR developer coding background" }
 ];
 
 export function YouTubeViewer() {
@@ -54,7 +54,9 @@ export function YouTubeViewer() {
     videoNotes,
     saveVideoNote,
     simulatedOfflineMode,
-    setSimulatedOfflineMode
+    setSimulatedOfflineMode,
+    youtubeApiKey,
+    setYoutubeApiKey
   } = useAppStore();
 
   // Local States
@@ -78,7 +80,7 @@ export function YouTubeViewer() {
   const [activeNotesTab, setActiveNotesTab] = useState<"description" | "notes" | "playlists">("description");
 
   // Filtering Options
-  const [selectedCategory, setSelectedCategory] = useState("All Cinema 🎬");
+  const [selectedCategory, setSelectedCategory] = useState("Boxing 🥊");
   const [sortBy, setSortBy] = useState<"relevance" | "date" | "viewCount" | "rating">("relevance");
   const [durationFilter, setDurationFilter] = useState<"any" | "short" | "medium" | "long">("any");
   const [showFilters, setShowFilters] = useState(false);
@@ -93,6 +95,10 @@ export function YouTubeViewer() {
   const [dropdownVideo, setDropdownVideo] = useState<YouTubeVideo | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Settings State
+  const [showApiModal, setShowApiModal] = useState(false);
+  const [tempApiKey, setTempApiKey] = useState(youtubeApiKey);
 
   // Toast State for actions feedback
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -168,7 +174,12 @@ export function YouTubeViewer() {
         urlParams.append("pageToken", token);
       }
 
-      const response = await fetch(`/api/youtube/search?${urlParams.toString()}`);
+      const headers: Record<string, string> = {};
+      if (youtubeApiKey) {
+        headers["x-youtube-api-key"] = youtubeApiKey;
+      }
+
+      const response = await fetch(`/api/youtube/search?${urlParams.toString()}`, { headers });
       if (!response.ok) {
         throw new Error("Failed to load search results from server proxy.");
       }
@@ -369,6 +380,60 @@ export function YouTubeViewer() {
     <div className="flex flex-col h-full w-full relative bg-background text-foreground overflow-hidden">
       
       {/* Toast Feedback HUD */}
+      
+      {/* API Key Modal */}
+      {showApiModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-card w-full max-w-md p-6 rounded-3xl shadow-2xl border border-border/60 flex flex-col gap-4"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-500 flex items-center justify-center">
+                <Key className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-bold text-lg leading-tight">YouTube API Key</h3>
+                <p className="text-xs text-foreground/60 leading-relaxed font-medium">Use your own Data API v3 key to bypass global rate limits.</p>
+              </div>
+            </div>
+
+            <div className="space-y-1 mt-2">
+              <label className="text-[10px] font-bold text-foreground/50 uppercase tracking-wider pl-1">Your Custom API Key</label>
+              <input
+                type="text"
+                value={tempApiKey}
+                onChange={(e) => setTempApiKey(e.target.value)}
+                placeholder="AIzaSy..."
+                className="w-full bg-muted/50 border border-border/80 px-4 py-3 rounded-xl text-sm font-mono focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary placeholder:text-foreground/30 transition-all"
+              />
+            </div>
+
+            <div className="flex gap-3 justify-end mt-4 pt-4 border-t border-border/40">
+              <button 
+                onClick={() => setShowApiModal(false)}
+                className="px-4 py-2 text-xs font-bold text-foreground/60 hover:text-foreground transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={() => {
+                  setYoutubeApiKey(tempApiKey);
+                  setShowApiModal(false);
+                  triggerToast("Custom API key saved!");
+                  // Re-run search if live mode is active
+                  if (!simulatedOfflineMode && searchQuery) handleSearch(searchQuery);
+                }}
+                className="px-6 py-2 bg-primary hover:bg-primary/95 text-primary-foreground text-xs font-bold rounded-xl transition-all shadow-md active:scale-95 cursor-pointer"
+              >
+                Save Key
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
       <AnimatePresence>
         {toastMessage && (
           <motion.div 
@@ -405,6 +470,15 @@ export function YouTubeViewer() {
         {/* Offline Toggle Simulator + Main Tabs */}
         <div className="flex flex-wrap items-center gap-3">
           {/* Simulated Offline Mode indicator/switch */}
+          <button
+            onClick={() => setShowApiModal(true)}
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer bg-muted/40 hover:bg-muted text-foreground/70"
+            title="Configure Custom YouTube API Key"
+          >
+            <Key className="w-3.5 h-3.5 text-indigo-400" />
+            <span>API Key</span>
+          </button>
+          
           <button
             onClick={() => {
               setSimulatedOfflineMode(!simulatedOfflineMode);

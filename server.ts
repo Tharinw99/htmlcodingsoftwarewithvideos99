@@ -16,7 +16,12 @@ async function startServer() {
         return res.status(400).json({ error: "Query parameter 'q' is required." });
       }
 
-      const apiKey = process.env.YOUTUBE_API_KEY || "AIzaSyAM-x0pgWy_ypJTYzYqvAjcNT2HKCEQ5L0";
+      const customApiKey = req.headers["x-youtube-api-key"];
+      const apiKey = customApiKey || process.env.YOUTUBE_API_KEY || "AIzaSyAM-x0pgWy_ypJTYzYqvAjcNT2HKCEQ5L0";
+      if (!apiKey) {
+        console.error("Missing YOUTUBE_API_KEY environment variable");
+        return res.status(500).json({ error: "API key is not configured on the server. Please provide it in settings." });
+      }
       
       // Clean URL without any hidden time/date filters (like publishedAfter) to open results to all years.
       let youtubeUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=48&q=${encodeURIComponent(q)}&type=video&key=${apiKey}`;
