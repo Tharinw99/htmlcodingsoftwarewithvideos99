@@ -35,9 +35,7 @@ import { YouTubeVideo } from "../types";
 const CATEGORIES = [
   { label: "Boxing 🥊", query: "Boxing highlights full fight knockouts" },
   { label: "MMA / UFC 🥋", query: "UFC MMA highlights full fights" },
-  { label: "Sports Podcasts 🎙️", query: "Sports boxing podcast interviews" },
-  { label: "Lofi Beats 🎧", query: "Lofi hip hop beats relaxing background" },
-  { label: "Tech & Coding 💻", query: "Mechanical keyboard ASMR developer coding background" }
+  { label: "Sports Podcasts 🎙️", query: "Sports boxing podcast interviews" }
 ];
 
 export function YouTubeViewer() {
