@@ -1,6 +1,4 @@
 name: Deploy Vite Site to GitHub Pages
-# ... (standard GitHub Actions workflow for Vite)
-name: Deploy Vite Site to GitHub Pages
 
 on:
   push:
