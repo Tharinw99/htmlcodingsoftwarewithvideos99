@@ -40,7 +40,12 @@ import { YouTubeVideo } from "../types";
 const CATEGORIES = [
   { label: "Boxing 🥊", query: "Boxing highlights full fight knockouts" },
   { label: "MMA / UFC 🥋", query: "UFC MMA highlights full fights" },
-  { label: "Sports Podcasts 🎙️", query: "Sports boxing podcast interviews" }
+  { label: "Sports Podcasts 🎙️", query: "Sports boxing podcast interviews" },
+  { label: "Funny 🎭", query: "funniest videos tries not to laugh memes clean jokes" },
+  { label: "Gaming 🎮", query: "trending gameplay walkthrough let's play video game stream" },
+  { label: "Music 🎵", query: "news hits music video songs live performance session" },
+  { label: "Tech 💻", query: "latest technology gadgets unboxing smartphone reviews future tech" },
+  { label: "Movies 🎬", query: "cinematic official movie trailers teasers reviews drama film" }
 ];
 
 const PRE_POPULATED_CHANNELS = [
@@ -73,11 +78,13 @@ const PRE_POPULATED_CHANNELS = [
 interface YouTubeViewerProps {
   activeMainTab?: "browse" | "playlists" | "offline" | "channels" | "downloader";
   setActiveMainTab?: (tab: "browse" | "playlists" | "offline" | "channels" | "downloader") => void;
+  isSidebarCollapsed?: boolean;
 }
 
 export function YouTubeViewer({
   activeMainTab: externalActiveMainTab,
-  setActiveMainTab: externalSetActiveMainTab
+  setActiveMainTab: externalSetActiveMainTab,
+  isSidebarCollapsed
 }: YouTubeViewerProps = {}) {
   // Global Store States
   const {
@@ -767,33 +774,71 @@ export function YouTubeViewer({
       </AnimatePresence>
 
       {/* Top Banner Navigation Row */}
-      <header className="border-b border-border/40 bg-card/60 backdrop-blur-md sticky top-0 z-40 shrink-0 px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-rose-500 via-red-500 to-indigo-500 flex items-center justify-center text-white shadow-lg shadow-red-500/10">
-            <Tv className="w-5 h-5" />
+      <header className="border-b border-border/40 dark:border-zinc-800/80 bg-card/60 backdrop-blur-md sticky top-0 z-40 shrink-0 px-6 py-3 flex flex-col sm:flex-row items-center justify-between gap-4">
+        {/* Left: YouTube Cinema Logo */}
+        <div className="flex items-center gap-2.5 shrink-0 select-none">
+          <div className="w-9 h-[24px] rounded-[6px] bg-red-600 flex items-center justify-center text-white shrink-0 shadow-sm shadow-red-600/10">
+            <Play className="w-3 h-3 fill-current text-white ml-[1px]" />
           </div>
           <div>
-            <h1 className="text-xl font-black tracking-tight flex items-center gap-2">
-              YouTube Cinema Workspace
-              <span className="font-sans font-bold text-[10px] uppercase bg-red-500 text-white px-2 py-0.5 rounded-md self-center tracking-wider">
-                PRO DATA API
+            <h1 className="text-base font-black tracking-tighter flex items-center gap-1.5 leading-none">
+              YouTube <span className="font-light text-foreground/75">Cinema</span>
+              <span className="font-sans font-extrabold text-[9px] bg-red-600/10 text-red-500 px-1.5 py-0.5 rounded tracking-wide">
+                API V3
               </span>
             </h1>
-            <p className="text-xs text-foreground/50 font-medium">
-              Cinematic streaming workspace with playlists, offline caching & interactive journaling notes.
-            </p>
           </div>
         </div>
 
-        {/* Offline Toggle Simulator + Main Tabs */}
-        <div className="flex flex-wrap items-center gap-3">
-          {/* Simulated Offline Mode indicator/switch */}
+        {/* Center: YouTube-style standard Search Bar for browse view */}
+        <div className="flex-grow max-w-[500px] w-full">
+          {activeMainTab === "browse" && !videoId && (
+            <form onSubmit={handleSearchSubmit} className="flex items-center w-full">
+              <div className="relative flex-grow">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search live streams, music, gaming, drone 4K..."
+                  className="w-full bg-background border border-border/80 dark:border-zinc-800 rounded-l-full py-1.5 pl-4 pr-10 text-[11px] font-medium focus:outline-none focus:ring-1 focus:ring-red-600 focus:border-red-600 text-foreground shadow-inner"
+                />
+                {searchQuery && (
+                  <button 
+                    type="button" 
+                    onClick={() => setSearchQuery("")} 
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/45 hover:text-foreground text-xs font-bold"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+              <button
+                type="submit"
+                className="bg-muted hover:bg-muted/80 text-foreground border border-l-0 border-border/80 dark:border-zinc-800 rounded-r-full px-5 py-2 cursor-pointer transition-colors"
+                title="Search YouTube"
+              >
+                <Search className="w-3.5 h-3.5 text-foreground/70" />
+              </button>
+            </form>
+          )}
+          {activeMainTab !== "browse" && (
+            <div className="text-center font-bold text-xs uppercase tracking-widest text-foreground/40 font-mono">
+              {activeMainTab === "channels" && "Creators Hub Workspace"}
+              {activeMainTab === "downloader" && "YouTube high-speed media extractor"}
+              {activeMainTab === "playlists" && "Personal video study lists"}
+              {activeMainTab === "offline" && "Encrypted local study cache"}
+            </div>
+          )}
+        </div>
+
+        {/* Right: Actions (API Key, simulated online indicator, etc.) */}
+        <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={() => setShowApiModal(true)}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer bg-muted/40 hover:bg-muted text-foreground/70"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold border transition-all cursor-pointer bg-muted/40 hover:bg-muted text-foreground/70"
             title="Configure Custom YouTube API Key"
           >
-            <Key className="w-3.5 h-3.5 text-indigo-400" />
+            <Key className="w-3 h-3 text-indigo-400" />
             <span>API Key</span>
           </button>
           
@@ -803,7 +848,7 @@ export function YouTubeViewer({
               triggerToast(simulatedOfflineMode ? "Connected online! Searching live YouTube index" : "Offline mode simulated! Utilizing cached system memory.");
             }}
             className={cn(
-              "flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer",
+              "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold border transition-all cursor-pointer",
               simulatedOfflineMode 
                 ? "bg-amber-500/10 text-amber-500 border-amber-500/30" 
                 : "bg-muted/40 hover:bg-muted text-foreground/70"
@@ -812,77 +857,16 @@ export function YouTubeViewer({
           >
             {simulatedOfflineMode ? (
               <>
-                <WifiOff className="w-3.5 h-3.5 text-amber-500 animate-pulse" />
-                <span>Simulated Offline: ON</span>
+                <WifiOff className="w-3 h-3 text-amber-500 animate-pulse" />
+                <span>Offline: ON</span>
               </>
             ) : (
               <>
-                <Wifi className="w-3.5 h-3.5 text-emerald-500" />
-                <span>Simulated Offline: OFF</span>
+                <Wifi className="w-3 h-3 text-emerald-500" />
+                <span>Offline: OFF</span>
               </>
             )}
           </button>
-
-          {/* Main Module Tabs */}
-          <div className="bg-muted/60 p-1 rounded-xl border border-border/40 flex flex-wrap gap-0.5 justify-center sm:justify-start">
-            <button
-              onClick={() => { setActiveMainTab("browse"); setVideoId(null); }}
-              className={cn(
-                "px-3.5 py-2 font-bold text-[11px] rounded-lg transition-all cursor-pointer",
-                activeMainTab === "browse" && !videoId
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-foreground/60 hover:text-foreground"
-              )}
-            >
-              Browse Live
-            </button>
-            <button
-              onClick={() => { setActiveMainTab("channels"); setVideoId(null); }}
-              className={cn(
-                "px-3.5 py-2 font-bold text-[11px] rounded-lg transition-all flex items-center gap-1 cursor-pointer",
-                activeMainTab === "channels" && !videoId
-                  ? "bg-background text-foreground shadow-sm font-black"
-                  : "text-foreground/60 hover:text-foreground"
-              )}
-            >
-              <Radio className="w-3 h-3 text-red-500" />
-              <span>Channels</span>
-            </button>
-            <button
-              onClick={() => { setActiveMainTab("downloader"); setVideoId(null); }}
-              className={cn(
-                "px-3.5 py-2 font-bold text-[11px] rounded-lg transition-all flex items-center gap-1 cursor-pointer",
-                activeMainTab === "downloader" && !videoId
-                  ? "bg-background text-foreground shadow-sm font-black"
-                  : "text-foreground/60 hover:text-foreground"
-              )}
-            >
-              <DownloadCloud className="w-3 h-3 text-rose-500" />
-              <span>Downloader</span>
-            </button>
-            <button
-              onClick={() => { setActiveMainTab("playlists"); setVideoId(null); }}
-              className={cn(
-                "px-3.5 py-2 font-bold text-[11px] rounded-lg transition-all cursor-pointer",
-                activeMainTab === "playlists" && !videoId
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-foreground/60 hover:text-foreground"
-              )}
-            >
-              Playlists ({playlists.reduce((acc, p) => acc + p.videos.length, 0)})
-            </button>
-            <button
-              onClick={() => { setActiveMainTab("offline"); setVideoId(null); }}
-              className={cn(
-                "px-3.5 py-2 font-bold text-[11px] rounded-lg transition-all cursor-pointer",
-                activeMainTab === "offline" && !videoId
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-foreground/60 hover:text-foreground"
-              )}
-            >
-              Offline Cached ({offlineVideos.length})
-            </button>
-          </div>
         </div>
       </header>
 
@@ -1158,207 +1142,135 @@ export function YouTubeViewer({
             >
               {/* Filter Suggestion Pills Row & Extended Inputs Header */}
               {activeMainTab === "browse" && (
-                <div className="border-b border-border/30 bg-muted/20 p-5 shrink-0 space-y-4">
-                  {/* Tab Selector for Search Type */}
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="flex bg-muted/65 p-1 rounded-xl border border-border/40 w-fit">
-                      <button
-                        onClick={() => setActiveTab("search")}
-                        className={cn(
-                          "px-4 py-2 rounded-lg font-bold text-xs transition-all cursor-pointer",
-                          activeTab === "search"
-                            ? "bg-background text-foreground shadow-sm"
-                            : "text-foreground/60 hover:text-foreground"
-                        )}
-                      >
-                        Search & Play Pills
-                      </button>
-                      <button
-                        onClick={() => setActiveTab("direct")}
-                        className={cn(
-                          "px-4 py-2 rounded-lg font-bold text-xs transition-all cursor-pointer",
-                          activeTab === "direct"
-                            ? "bg-background text-foreground shadow-sm"
-                            : "text-foreground/60 hover:text-foreground"
-                        )}
-                      >
-                        Paste direct URL or video ID
-                      </button>
-                    </div>
-
-                    {/* View Mode Toggle & Filter */}
-                    <div className="flex items-center gap-2">
-                      <div className="flex bg-muted/65 p-1 rounded-xl border border-border/40 shrink-0">
-                        <button
-                          type="button"
-                          onClick={() => setViewMode("grid")}
-                          className={cn(
-                            "p-2 rounded-lg transition-all cursor-pointer",
-                            viewMode === "grid"
-                              ? "bg-background text-foreground shadow-sm"
-                              : "text-foreground/45 hover:text-foreground"
-                          )}
-                          title="Grid View"
-                        >
-                          <Grid className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setViewMode("list")}
-                          className={cn(
-                            "p-2 rounded-lg transition-all cursor-pointer",
-                            viewMode === "list"
-                              ? "bg-background text-foreground shadow-sm"
-                              : "text-foreground/45 hover:text-foreground"
-                          )}
-                          title="List View"
-                        >
-                          <List className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => setShowFilters(!showFilters)}
-                        className={cn(
-                          "flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer",
-                          showFilters ? "bg-primary/20 text-primary border-primary" : "bg-card hover:bg-muted text-foreground/75 border-border"
-                        )}
-                      >
-                        <SlidersHorizontal className="w-3.5 h-3.5" />
-                        <span>YouTube Search Filters</span>
-                        <ChevronDown className={cn("w-3.5 h-3.5 transition-transform", showFilters ? "rotate-180" : "")} />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Form input elements */}
-                  {activeTab === "search" ? (
-                    <form onSubmit={handleSearchSubmit} className="flex gap-2 max-w-3xl">
-                      <div className="relative flex-grow">
-                        <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-foreground/42" />
-                        <input
-                          type="text"
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          placeholder="Search live streams, lofi, or drone 4K..."
-                          className="w-full pl-10 pr-4 py-2.5 bg-card border border-border/80 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-xs font-medium placeholder:font-normal"
-                        />
-                      </div>
-                      <button
-                        type="submit"
-                        disabled={isLoading}
-                        className="bg-primary text-primary-foreground hover:bg-primary/95 px-5 py-2.5 rounded-xl font-bold flex items-center gap-1.5 transition-all text-xs cursor-pointer"
-                      >
-                        <Search className="w-3.5 h-3.5" />
-                        Search
-                      </button>
-                    </form>
-                  ) : (
-                    <form onSubmit={handleDirectSubmit} className="flex gap-2 max-w-3xl">
-                      <div className="relative flex-grow">
-                        <Tv className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-foreground/42" />
-                        <input
-                          type="text"
-                          value={url}
-                          onChange={(e) => setUrl(e.target.value)}
-                          placeholder="Paste a link format: https://www.youtube.com/watch?v=XXXXXXXXXXX"
-                          className="w-full pl-10 pr-4 py-2.5 bg-card border border-border/80 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-xs font-medium placeholder:font-normal"
-                        />
-                      </div>
-                      <button
-                        type="submit"
-                        className="bg-primary text-primary-foreground hover:bg-primary/95 px-5 py-2.5 rounded-xl font-bold flex items-center gap-1.5 transition-all text-xs cursor-pointer"
-                      >
-                        <Play className="w-3.5 h-3.5 fill-current" />
-                        Play Stream
-                      </button>
-                    </form>
-                  )}
-
-                  {/* Smart Filters Expansion Area */}
-                  <AnimatePresence>
-                    {showFilters && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="overflow-hidden pt-2 border-t border-border/20"
-                      >
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-1">
-                          {/* Sort Selector */}
-                          <div className="space-y-1.5">
-                            <label className="text-[10px] text-foreground/50 uppercase font-bold tracking-wider font-mono">
-                              Sort By (YouTube API Order)
-                            </label>
-                            <div className="flex gap-1.5 flex-wrap">
-                              {(["relevance", "date", "viewCount", "rating"] as const).map((s) => (
-                                <button
-                                  key={s}
-                                  onClick={() => handleFilterChangeAndSearch(s, durationFilter)}
-                                  className={cn(
-                                    "px-3 py-1.5 text-[11px] font-bold rounded-lg border transition-all cursor-pointer",
-                                    sortBy === s
-                                      ? "bg-primary text-primary-foreground border-primary"
-                                      : "bg-card text-foreground/70 hover:bg-muted border-border/50"
-                                  )}
-                                >
-                                  {s === "relevance" && "Most Relevant 🎯"}
-                                  {s === "date" && "Recently Uploaded ⏰"}
-                                  {s === "viewCount" && "Most Views 🔥"}
-                                  {s === "rating" && "Highest Rated ⭐"}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-
-                          {/* Video Duration Selector */}
-                          <div className="space-y-1.5">
-                            <label className="text-[10px] text-foreground/50 uppercase font-bold tracking-wider font-mono">
-                              Duration Filters
-                            </label>
-                            <div className="flex gap-1.5 flex-wrap">
-                              {(["any", "short", "medium", "long"] as const).map((d) => (
-                                <button
-                                  key={d}
-                                  onClick={() => handleFilterChangeAndSearch(sortBy, d)}
-                                  className={cn(
-                                    "px-3 py-1.5 text-[11px] font-bold rounded-lg border transition-all cursor-pointer",
-                                    durationFilter === d
-                                      ? "bg-primary text-primary-foreground border-primary"
-                                      : "bg-card text-foreground/70 hover:bg-muted border-border/50"
-                                  )}
-                                >
-                                  {d === "any" && "Any Duration ⏱️"}
-                                  {d === "short" && "Short (< 4m) ⚡"}
-                                  {d === "medium" && "Medium (4m-20m) 📺"}
-                                  {d === "long" && "Long (> 20m) 🎬"}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-
-                  {/* YouTube Category pills row */}
-                  <div className="flex items-center gap-2 overflow-x-auto pb-1.5 pt-1 scrollbar-thin">
+                <div className="border-b border-border/30 dark:border-zinc-800/60 bg-muted/10 px-6 py-3.5 shrink-0 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  {/* Left: YouTube Category pills row */}
+                  <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0 scrollbar-none flex-grow max-w-full md:max-w-[65%]">
                     {CATEGORIES.map((cat) => (
                       <button
                         key={cat.label}
                         onClick={() => handleCategoryClick(cat.label, cat.query)}
                         className={cn(
-                          "px-3.5 py-1.5 rounded-full text-xs font-bold shrink-0 transition-all cursor-pointer active:scale-95",
+                          "px-4 py-1.5 rounded-full text-xs font-semibold shrink-0 transition-all cursor-pointer active:scale-95",
                           selectedCategory === cat.label
-                            ? "bg-foreground text-background"
-                            : "bg-card border border-border/60 text-foreground/75 hover:bg-muted"
+                            ? "bg-foreground text-background font-bold shadow-sm"
+                            : "bg-muted/80 hover:bg-muted text-foreground/75 dark:text-zinc-300 dark:hover:bg-zinc-850"
                         )}
                       >
                         {cat.label}
                       </button>
                     ))}
                   </div>
+
+                  {/* Right: Tidy Filters (Dropdowns to remove clutter) & View Mode */}
+                  <div className="flex flex-wrap items-center gap-3 shrink-0">
+                    {/* Sort Selector Dropdown */}
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[10px] text-foreground/50 uppercase font-black tracking-wider">Sort:</span>
+                      <select
+                        value={sortBy}
+                        onChange={(e) => handleFilterChangeAndSearch(e.target.value as any, durationFilter)}
+                        className="bg-card text-foreground border border-border/60 rounded-xl px-2.5 py-1.5 text-xs font-bold focus:outline-none focus:border-red-650 transition-all cursor-pointer shadow-sm dark:bg-zinc-900"
+                      >
+                        <option value="relevance">Most Relevant 🎯</option>
+                        <option value="date">Recently Uploaded ⏰</option>
+                        <option value="viewCount">Most Views 🔥</option>
+                        <option value="rating">Highest Rated ⭐</option>
+                      </select>
+                    </div>
+
+                    {/* Duration Selector Dropdown */}
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[10px] text-foreground/50 uppercase font-black tracking-wider">Length:</span>
+                      <select
+                        value={durationFilter}
+                        onChange={(e) => handleFilterChangeAndSearch(sortBy, e.target.value as any)}
+                        className="bg-card text-foreground border border-border/60 rounded-xl px-2.5 py-1.5 text-xs font-bold focus:outline-none focus:border-red-650 transition-all cursor-pointer shadow-sm dark:bg-zinc-900"
+                      >
+                        <option value="any">Any Duration ⏱️</option>
+                        <option value="short">Short (&lt; 4m) ⚡</option>
+                        <option value="medium">Medium (4m-20m) 📺</option>
+                        <option value="long">Long (&gt; 20m) 🎬</option>
+                      </select>
+                    </div>
+
+                    {/* Collapsible Direct Play trigger to remove clutter */}
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab(activeTab === "direct" ? "search" : "direct")}
+                      className={cn(
+                        "text-xs font-bold px-3 py-1.5 rounded-xl border transition-all cursor-pointer shadow-sm",
+                        activeTab === "direct" 
+                          ? "bg-red-500/15 text-red-500 border-red-500/30" 
+                          : "bg-card border-border hover:bg-muted text-foreground/75 dark:bg-zinc-900"
+                      )}
+                      title="Paste raw video link or direct ID to play"
+                    >
+                      <span>Direct Play</span>
+                    </button>
+
+                    {/* View mode buttons */}
+                    <div className="flex bg-muted p-1 rounded-xl border border-border/40 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => setViewMode("grid")}
+                        className={cn(
+                          "p-1.5 rounded-lg transition-all cursor-pointer",
+                          viewMode === "grid"
+                            ? "bg-background text-foreground shadow-sm"
+                            : "text-foreground/45 hover:text-foreground"
+                        )}
+                        title="Grid View"
+                      >
+                        <Grid className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setViewMode("list")}
+                        className={cn(
+                          "p-1.5 rounded-lg transition-all cursor-pointer",
+                          viewMode === "list"
+                            ? "bg-background text-foreground shadow-sm"
+                            : "text-foreground/45 hover:text-foreground"
+                        )}
+                        title="List View"
+                      >
+                        <List className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Collapsible Direct Paste panel (only when active tab is direct URL) */}
+              {activeMainTab === "browse" && activeTab === "direct" && (
+                <div className="bg-muted/30 border-b border-border/20 px-6 py-3 shrink-0">
+                  <form onSubmit={handleDirectSubmit} className="flex gap-2 max-w-3xl items-center">
+                    <span className="text-[10px] text-foreground/50 font-bold uppercase shrink-0">URL:</span>
+                    <div className="relative flex-grow">
+                      <Tv className="w-3.5 h-3.5 absolute left-3.5 top-1/2 -translate-y-1/2 text-foreground/42" />
+                      <input
+                        type="text"
+                        value={url}
+                        onChange={(e) => setUrl(e.target.value)}
+                        placeholder="Paste link format: https://www.youtube.com/watch?v=XXXXXXXXXXX"
+                        className="w-full pl-10 pr-4 py-2 bg-background border border-border rounded-xl focus:outline-none focus:ring-1 focus:ring-red-600 focus:border-red-650 text-xs font-medium placeholder:font-normal"
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      className="bg-red-600 text-white hover:bg-red-550 px-5 py-2 rounded-xl font-bold flex items-center gap-1.5 transition-all text-xs cursor-pointer shadow-md"
+                    >
+                      <Play className="w-3 h-3 fill-current" />
+                      Load Stream
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab("search")}
+                      className="text-xs bg-muted hover:bg-muted/80 px-3 py-2 rounded-xl font-bold text-foreground/60 transition-colors cursor-pointer"
+                    >
+                      Close
+                    </button>
+                  </form>
                 </div>
               )}
 
@@ -1790,14 +1702,14 @@ export function YouTubeViewer({
                 {activeMainTab === "channels" && (
                   <div className="space-y-6">
                     {/* Channel Radar Subheader */}
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-red-950/20 via-card to-card p-6 rounded-2xl border border-red-500/10">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-rose-950/20 via-card to-card p-6 rounded-2xl border border-rose-500/10">
                       <div>
                         <h2 className="text-lg font-black tracking-tight flex items-center gap-2 text-foreground">
                           <Radio className="w-4 h-4 text-red-500 animate-pulse" />
-                          Combat Channel Hub
+                          Creators Hub 💎
                         </h2>
                         <p className="text-xs text-foreground/50 mt-1 max-w-xl leading-relaxed">
-                          Follow elite promoters, boxing channels & coaches. Search channels by name, view catalogs, and add clip elements directly into your training vault.
+                          Follow elite promoters, popular entertainers, and top-tier YouTube creators. Search channels by name, view full video catalogs, and save clips directly into your personal vault.
                         </p>
                       </div>
 
